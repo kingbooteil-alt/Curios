@@ -1,0 +1,13 @@
+{
+  "name": "Curios — Explorer le savoir",
+  "short_name": "Curios",
+  "description": "Apprendre, explorer, découvrir.",
+  "lang": "fr-FR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f8fa",
+  "theme_color": "#102d46",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
