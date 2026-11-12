@@ -1,0 +1,137 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#102d46">
+<title>Curios — Explorer le savoir</title>
+<style>
+:root{--navy:#102d46;--turq:#20aab5;--paper:#f3f7f9;--ink:#173247;--muted:#718696;--line:#e1eaf0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,sans-serif}
+button,input{font:inherit}
+.app{max-width:760px;min-height:100vh;margin:auto;padding-bottom:85px}
+.hero{background:var(--navy);color:white;padding:24px 20px 26px;border-radius:0 0 27px 27px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:26px;font-weight:900;letter-spacing:2px}
+.tag{font-size:10px;letter-spacing:2px;color:#b9d8e2}
+.avatar{border:1px solid #648398;border-radius:50%;background:#204b66;color:white;width:44px;height:44px;font-size:22px}
+.hello{margin-top:25px;color:#c6dce5;font-size:13px}
+.headline{font-size:25px;font-weight:850}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:20px}
+.stat{padding:12px;background:#1b4962;border:1px solid #315b72;border-radius:15px}
+.stat strong{display:block;font-size:22px}
+.stat span{font-size:11px;color:#c6dce5}
+.content{padding:20px 16px}
+.eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:850;color:var(--muted)}
+h1{font-size:24px;margin:5px 0}
+h2{font-size:18px;margin:0}
+.intro{font-size:13px;line-height:1.5;color:var(--muted);margin:5px 0 18px}
+.pack{padding:20px;border-radius:22px;background:linear-gradient(135deg,#147f91,#20aab5);color:white}
+.pack h2{font-size:21px;margin:7px 0}
+.pack p{font-size:13px;line-height:1.5;color:#e2fbfc}
+.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:800;background:var(--navy);color:white}
+.btn.light{background:white;color:#116b79}
+.btn.soft{background:#e8f5f7;color:#126d78}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tile,.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:16px}
+.tile{text-align:left;color:var(--ink);min-height:110px}
+.tile .ico{font-size:23px}
+.tile b{display:block;margin:8px 0 3px}
+.tile small,.muted{font-size:12px;color:var(--muted)}
+.nav{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);padding:9px 5px calc(9px + env(safe-area-inset-bottom));background:white;border-top:1px solid var(--line)}
+.nav button{border:0;background:none;color:#8193a0;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button span{font-size:21px}
+.nav button.active{color:#118b99}
+.field,.search{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;margin:8px 0 14px;background:white}
+.course{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
+.empty{padding:28px 15px;text-align:center;color:var(--muted);background:white;border:1px dashed #cbd9e1;border-radius:17px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hero">
+<div class="top">
+<div><div class="logo">CURIOS</div><div class="tag">APPRENDRE · EXPLORER · DÉCOUVRIR</div></div>
+<button class="avatar" id="avatarBtn">🔭</button>
+</div>
+<div class="hello" id="hello">Bienvenue, Explorateur</div>
+<div class="headline">Le savoir est une aventure.</div>
+<div class="stats">
+<div class="stat"><strong id="completedCount">0</strong><span>Cours terminés</span></div>
+<div class="stat"><strong id="cardCount">0</strong><span>Cartes obtenues</span></div>
+<div class="stat"><strong id="progressCount">0 %</strong><span>Bibliothèque</span></div>
+</div>
+</header>
+<main class="content" id="view"></main>
+</div>
+<nav class="nav">
+<button class="active" data-page="home"><span>⌂</span>Accueil</button>
+<button data-page="collections"><span>▧</span>Collections</button>
+<button data-page="encyclopedia"><span>⌕</span>Encyclopédie</button>
+<button data-page="profile"><span>◎</span>Profil</button>
+</nav>
+<script src="courses.js"></script>
+<script src="core.js"></script>
+<script>
+(()=>{
+const core=window.CURIOS_CORE;
+const courses=window.CURIOS_COURSES||[];
+let page="home",query="";
+const $=s=>document.querySelector(s);
+const state=()=>core.getState();
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function updateHeader(){
+const s=state();
+$("#hello").textContent="Bienvenue, "+(s.nickname||"Explorateur");
+$("#avatarBtn").textContent=s.avatar||"🔭";
+$("#completedCount").textContent=s.completed.length;
+$("#cardCount").textContent=s.cards.length;
+$("#progressCount").textContent=Math.round(s.cards.length/Math.max(1,courses.length)*100)+" %";
+}
+function card(c){
+return '<article class="course"><small>'+esc(c.discipline)+' · '+(c.minutes||15)+' min</small><h3>'+esc(c.title)+'</h3><p class="muted">'+esc(c.summary||"Une découverte à explorer.")+'</p></article>';
+}
+function home(){
+return '<div class="eyebrow">TON ESPACE</div><h1>Prêt à explorer ?</h1><p class="intro">Chaque découverte enrichit tes connaissances et ta collection.</p><section class="pack"><div class="eyebrow" style="color:#d9f5f6">TON PROCHAIN VOYAGE</div><h2>Trois sujets. Une seule découverte.</h2><p>Un pack te proposera trois cours de disciplines différentes. À toi de choisir celui qui t’inspire.</p><button class="btn light" id="packBtn">Préparer un pack ✦</button></section><h2 style="margin:22px 0 12px">Explorer Curios</h2><div class="grid"><button class="tile" data-goto="collections"><span class="ico">🗂️</span><b>Mes collections</b><small>Retrouver les cartes gagnées</small></button><button class="tile" data-goto="encyclopedia"><span class="ico">📚</span><b>Encyclopédie</b><small>Parcourir les connaissances</small></button></div>';
+}
+function collections(){
+const s=state(),list=courses.filter(c=>s.cards.includes(c.id));
+return '<div class="eyebrow">TA BIBLIOTHÈQUE</div><h1>Mes collections</h1><p class="intro">Chaque carte récompense un cours terminé et réussi.</p>'+(list.length?list.map(card).join(""):'<div class="empty">🃏<h2>Aucune carte pour le moment</h2>Termine ton premier cours pour commencer ta collection.</div>');
+}
+function encyclopedia(){
+const s=state(),list=courses.filter(c=>s.cards.includes(c.id)&&(!query||c.title.toLowerCase().includes(query.toLowerCase())||c.discipline.toLowerCase().includes(query.toLowerCase())));
+return '<div class="eyebrow">SAVOIRS DÉBLOQUÉS</div><h1>Encyclopédie</h1><p class="intro">Retrouve les sujets que tu as étudiés.</p><input class="search" id="search" placeholder="Rechercher un sujet…" value="'+esc(query)+'">'+(list.length?list.map(card).join(""):'<div class="empty">Tes articles débloqués apparaîtront ici.</div>');
+}
+function profile(){
+const s=state();
+return '<div class="eyebrow">ESPACE PERSONNEL</div><h1>Mon profil</h1><p class="intro">Tes données restent sur cet appareil. Aucun compte n’est nécessaire.</p><section class="panel"><label>Pseudonyme</label><input class="field" id="nickname" maxlength="24" value="'+esc(s.nickname||"Explorateur")+'"><label>Avatar</label><input class="field" id="avatar" maxlength="4" value="'+esc(s.avatar||"🔭")+'"><button class="btn" id="saveProfile">Enregistrer</button></section><section class="panel" style="margin-top:12px"><h2>Sauvegarde locale</h2><p class="muted">Conserve une copie de ta progression.</p><button class="btn soft" id="exportBtn">Exporter ma sauvegarde</button></section>';
+}
+function render(){
+updateHeader();
+$("#view").innerHTML=page==="home"?home():page==="collections"?collections():page==="encyclopedia"?encyclopedia():profile();
+document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+}
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>{page=b.dataset.page;render()}));
+$("#avatarBtn").addEventListener("click",()=>{page="profile";render()});
+$("#view").addEventListener("input",e=>{
+if(e.target.id==="search"){query=e.target.value;const p=e.target.selectionStart;render();$("#search").focus();$("#search").setSelectionRange(p,p);}
+});
+$("#view").addEventListener("click",e=>{
+const go=e.target.closest("[data-goto]");
+if(go){page=go.dataset.goto;render();return;}
+if(e.target.id==="packBtn")alert("Le système de packs sera activé avec le catalogue complet.");
+if(e.target.id==="saveProfile"){
+const s=state();s.nickname=$("#nickname").value.trim()||"Explorateur";s.avatar=$("#avatar").value.trim()||"🔭";core.save();render();
+}
+if(e.target.id==="exportBtn"){
+const blob=new Blob([core.exportBackup()],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+a.href=url;a.download="curios-sauvegarde.json";a.click();URL.revokeObjectURL(url);
+}
+});
+render();
+})();
+</script>
+</body>
+</html>
