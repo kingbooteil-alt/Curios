@@ -115,12 +115,16 @@ function profile() {
 
 function render() {
   header();
-  $("#view").innerHTML =
-    page === "home" ? home() :
-    page === "collections" ? collections() :
-    page === "encyclopedia" ? encyclopedia() :
-    page === "profile" ? profile() :
-    page === "lesson" ? lesson() : "";
+
+  if (page === "lesson") {
+    lesson();
+  } else {
+    $("#view").innerHTML =
+      page === "home" ? home() :
+      page === "collections" ? collections() :
+      page === "encyclopedia" ? encyclopedia() :
+      page === "profile" ? profile() : "";
+  }
 
   document.querySelectorAll(".nav button").forEach(b =>
     b.classList.toggle("active", b.dataset.page === page)
